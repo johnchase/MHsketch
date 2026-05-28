@@ -9,27 +9,68 @@ Tazin Rahman, and Ananth Kalyanaraman. "Density-reducing Jaccard Estimators for
 Sketch-based Long Read Applications", Under Review
 
 # Dependencies:
-JEM-Alltoallc has the following dependencies:
+MHsketch has the following dependencies:
 
 * MPI library (preferably MPI-3 compatible)
-* C++14 (or greater) compliant compiler
+* MPI C++ compiler wrapper, such as `mpicxx`
+* MPI launcher, such as `mpiexec`
+* OpenMP support
+* GNU C++14 (or greater) compatible compiler
 
 # Build:
-make ksize=$KMER_SIZE
+Build the `jem` binary with:
 
-For example:
-make ksize = 15
+```sh
+make ksize=15
+```
+
+`ksize` is passed to the compiler as `WINDW_SIZE`; the code defines
+`KMER_LENGTH` as `WINDW_SIZE + 1`. You can also use the uppercase variable:
+
+```sh
+make KSIZE=15
+```
+
+If your MPI compiler wrapper is not named `mpicxx`, override it:
+
+```sh
+make MPICXX=/path/to/mpicxx ksize=15
+```
+
+On macOS with Homebrew, install the required MPI/OpenMP dependencies with:
+
+```sh
+brew install open-mpi libomp
+```
+
+The Makefile detects Homebrew `libomp` and adds the required OpenMP include and
+link flags automatically.
 
 # Execute:
 For the multi-threaded version, set the number of threads:
-```
-export OMP_NUM_THREADS= $number_of_threads
+```sh
+export OMP_NUM_THREADS=$number_of_threads
 ```
 Run MHsketch:
+```sh
+mpiexec -np $number_of_procs ./jem \
+  -c {Contig_Fasta_File} \
+  -r {Long_Read_Fasta_File} \
+  -a {A_int_Values_File} \
+  -b {B_int_Values_File} \
+  -p {Prime_int_Values_File} \
+  -l $read_segment_length \
+  -t $number_of_hash_trials \
+  -m minimizer \
+  -w $window_size
 ```
-mpiexec -np $number_of_procs $BINARY -s {Contig_Fasta_File} -q {Long_Read_Fasta_File} -a {A_int_Values_File} -b {B_int_Values_File} -p {Prime_int_Values_File} -r $read_segment length -T $NO_OF_TRIALS
+
+You can run the included example data through the Makefile:
+
+```sh
+make run-example ksize=15 NP=4 OMP_NUM_THREADS=8
 ```
-```
+
 Input arguments 
 * -c: input contigs fasta file
 * -r: input long reads fasta file
@@ -37,18 +78,27 @@ Input arguments
 * -b: input file for B values for linear congruential hash function of the form [(Ax+B)%P]
 * -p: input file for  prime numbers (P) for hash function  [(Ax+B)%P]
 * -l: read segment length
-* -t: number of trials
-* -m: sketching method you want ot use; it can be minimizer, or syncmer, or strobemer
+* -t: number of hash trials; must be 1-150 for the included constants files
+* -m: sketching method you want to use; it can be minimizer, syncmer, or strobemer
 Optional arguments
 * -s: if you are using syncmer as the sketching method, then provide the s-size
 * -w: if you are using minimizer as the sketching method, then provide the window size; if you are using strobemer as sketching method, provide the w_min size
 * -v: if you are using strobemer as sketching method, provide the w_max size
-```
 
 For example, if we want to run it on 8 threads and 4 processes:  
-export OMP_NUM_THREADS=8  
-mpiexec -np 4 ./jem -s ~/Ecoli_reads_100x_contigs.fasta -q ~/Ecoli_reads_10x_long_reads.fasta -a ~/A.txt -b ~/B.txt -p ~/Prime.txt -r 1000 -T 30
+```sh
+export OMP_NUM_THREADS=8
+mpiexec -np 4 ./jem \
+  -c ~/Ecoli_reads_100x_contigs.fasta \
+  -r ~/Ecoli_reads_10x_long_reads.fasta \
+  -a ~/A.txt \
+  -b ~/B.txt \
+  -p ~/Prime.txt \
+  -l 1000 \
+  -t 30 \
+  -m minimizer \
+  -w 10
+```
 
 Notes:
 * This code has been tested on high-performance computing cluster (HPC) with MPI compatibility. For the system we used we had to set the number of processes in the given way. Please change the parameters accordingly.
-

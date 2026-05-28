@@ -65,6 +65,7 @@
 
 
 #define KMER_LENGTH                    (WINDW_SIZE+1)
+#define LMER_LENGTH                    KMER_LENGTH
 #define LMER_SIZE                      (pow(4, LMER_LENGTH))
 #define MN_LENGTH                      (KMER_LENGTH-1)
 #define KMER_SIZE                      (pow(4, KMER_LENGTH))
