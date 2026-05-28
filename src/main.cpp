@@ -46,7 +46,6 @@
 #include <vector>
 #include <algorithm>
 #include <unordered_map>
-#include <parallel/algorithm>
 #include <numeric>
 #include <omp.h>
 #include "JEM.h"
@@ -272,12 +271,42 @@ void parseCommandLine(const int argc, char * const argv[])
     }
 
     if (rank==0 && inputFileName.empty()) {
-        std::cerr << "Must specify an input FASTA file name with -s" << std::endl;
+        std::cerr << "Must specify an input contig FASTA file name with -c" << std::endl;
+        MPI_Abort(MPI_COMM_WORLD, -99);
+    }
+
+    if (rank==0 && queryFileName.empty()) {
+        std::cerr << "Must specify an input long-read FASTA file name with -r" << std::endl;
+        MPI_Abort(MPI_COMM_WORLD, -99);
+    }
+
+    if (rank==0 && AFileName.empty()) {
+        std::cerr << "Must specify hash A values file with -a" << std::endl;
+        MPI_Abort(MPI_COMM_WORLD, -99);
+    }
+
+    if (rank==0 && BFileName.empty()) {
+        std::cerr << "Must specify hash B values file with -b" << std::endl;
+        MPI_Abort(MPI_COMM_WORLD, -99);
+    }
+
+    if (rank==0 && primeFileName.empty()) {
+        std::cerr << "Must specify hash prime values file with -p" << std::endl;
         MPI_Abort(MPI_COMM_WORLD, -99);
     }
 
     if (rank==0 && !read_length) {
         std::cerr << "Must specify read_length with -l" << std::endl;
+        MPI_Abort(MPI_COMM_WORLD, -99);
+    }
+
+    if (rank==0 && node_threashold <= 0) {
+        std::cerr << "Must specify number of hash trials with -t" << std::endl;
+        MPI_Abort(MPI_COMM_WORLD, -99);
+    }
+
+    if (rank==0 && node_threashold > 150) {
+        std::cerr << "Number of hash trials must be <= 150" << std::endl;
         MPI_Abort(MPI_COMM_WORLD, -99);
     }
 
@@ -292,7 +321,7 @@ void parseCommandLine(const int argc, char * const argv[])
             MPI_Abort(MPI_COMM_WORLD, -99);
         }
         if (sketch_method != "minimizer" && sketch_method != "syncmer" && sketch_method != "strobemer") {
-            std::cerr << "Invalid sketch method. Use -k with 'minimizer', 'syncmer', or 'strobemer'" << std::endl;
+            std::cerr << "Invalid sketch method. Use -m with 'minimizer', 'syncmer', or 'strobemer'" << std::endl;
             MPI_Abort(MPI_COMM_WORLD, -99);
         }
     }
@@ -307,5 +336,3 @@ void parseCommandLine(const int argc, char * const argv[])
     // Set globals or config structs for sketch_method, w, s, etc.
 }
  // parseCommandLine
-
-

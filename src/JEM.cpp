@@ -45,7 +45,6 @@
 #include <vector>
 #include <algorithm>
 #include <unordered_map>
-#include <parallel/algorithm>
 #include <numeric>
 #include <omp.h>
 #include "JEM.h"
@@ -790,9 +789,9 @@ void Sliding_window_l (const char *ptr, size_t length) {
         rev_set_tracker.clear();
         rev_set_tracker.shrink_to_fit();
     
-    p++;
-    
-    p++; /*skip the newline*/
+    while (p < length && isspace(ptr[p])) {
+        p++;
+    }
     
     
     /*if(ptr[p] != '>')
@@ -822,16 +821,8 @@ void Sliding_window_queires (char *ptr, size_t length, int *num_queries,
     std::vector<kmer_t> set_of_distinct_pos;
     //set_of_distinct_pos_rev
     int total_queries = 0;
-    const std::string s0("/home/trahman/JEM_W_Sync/Previous_Max/Output/Mp1_all_mn_out_");
-    char proc_id[3];
-    char output_file_name[25];
-    
-    sprintf(proc_id, "%d", rank); 
-    //strcpy(output_file_name,"wired_mn_out_");
-    strcpy(output_file_name, s0.c_str());
-    strcpy(&output_file_name[strlen(output_file_name)],proc_id);
-    strcpy(&output_file_name[strlen(output_file_name)],".log");
-    FILE *f = fopen(output_file_name, "w");
+    std::string output_file_name = "Mp1_all_mn_out_" + std::to_string(rank) + ".log";
+    FILE *f = fopen(output_file_name.c_str(), "w");
     if (f == NULL)
     {
         printf("Error opening file!\n");
@@ -1305,8 +1296,9 @@ void Sliding_window_queires (char *ptr, size_t length, int *num_queries,
         //initial_sets.push_back(hash_kmers);
         //hash_kmers.clear();
         //hash_kmers.shrink_to_fit();
-        p++; 
-        p++;
+        while (p < length && isspace(ptr[p])) {
+            p++;
+        }
         //std::cout<<"After "<<rank<<" "<<ptr[p]<<"\n";
     }
     //free(th);
@@ -1688,8 +1680,9 @@ void Sliding_window (char *ptr, size_t length, int *M_for_individual_process, in
         set_of_distinct_pos_rev.shrink_to_fit();
         set_of_dist_kmers.clear();
         set_of_dist_kmers.shrink_to_fit();
-        p++; 
-        p++;
+        while (p < length && isspace(ptr[p])) {
+            p++;
+        }
         //printf("After %c", ptr[p]);
         //std::cout<<"After "<<rank<<" "<<ptr[p]<<"\n";
     }
@@ -2140,16 +2133,8 @@ void generate_set_of_queries (const char *read_data, size_t length, int start_in
           //  printf("\n");
         //}
     }*/
-    const std::string s0("/home/trahman/Asymm/OutPut/Mp1_all_mn_out_");
-    char proc_id[3];
-    char output_file_name[25];
-
-    sprintf(proc_id, "%d", rank); 
-    //strcpy(output_file_name,"wired_mn_out_");
-    strcpy(output_file_name, s0.c_str());
-    strcpy(&output_file_name[strlen(output_file_name)],proc_id);
-    strcpy(&output_file_name[strlen(output_file_name)],".log");
-    FILE *f = fopen(output_file_name, "w");
+    std::string output_file_name = "Mp1_all_mn_out_" + std::to_string(rank) + ".log";
+    FILE *f = fopen(output_file_name.c_str(), "w");
     if (f == NULL)
     {
         printf("Error opening file!\n");

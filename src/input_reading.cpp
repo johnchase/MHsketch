@@ -46,7 +46,6 @@
 #include <vector>
 #include <algorithm>
 #include <unordered_map>
-#include <parallel/algorithm>
 #include <numeric>
 #include <omp.h>
 #include "JEM.h"
@@ -324,4 +323,3 @@ input_read_data perform_input_reading (const int rank, const int size,
     return input_rdata;
 
 }
-
